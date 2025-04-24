@@ -1,2 +1,3 @@
 (library
- (name bfvm))
+ (name bfvm)
+ (public_name bfvm))
