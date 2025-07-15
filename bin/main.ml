@@ -1,7 +1,7 @@
 let () =
-  let open Bfvm in
-  let input = ">>.+" in
-  let tokens = lex input 0 in
+  let open Parse in
+  let filename = Sys.argv.(1) in
+  let tokens = parse filename in
   List.iter (fun t ->
     match t with
       | T_INC -> print_string "INC "
