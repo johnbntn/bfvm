@@ -1,4 +1,4 @@
 (executable
  (public_name bfvm)
  (name main)
- (libraries parse))
+ (libraries bfvm))

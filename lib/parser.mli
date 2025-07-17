@@ -22,3 +22,5 @@ type token =
 
   
 val parse : string -> token list
+
+val token_to_string : token -> string
