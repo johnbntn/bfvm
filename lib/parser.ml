@@ -41,8 +41,8 @@ let rec parse_lines input_line line_num pos =
                     
 let parse filename = 
   let lines = In_channel.with_open_text filename In_channel.input_lines in
-  List.append (List.flatten (List.mapi (fun i line -> parse_lines line i 0) lines)) [T_EOF]
-
+  List.flatten (List.mapi (fun i line -> parse_lines line i 0) lines)
+  
 let token_to_string = function
   | T_PLUS -> "T_PLUS"
   | T_MINUS -> "T_MINUS"
