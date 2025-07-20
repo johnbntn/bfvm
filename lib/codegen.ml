@@ -1,13 +1,21 @@
 open Parser
 
+type loop = {
+  header_bb: Llvm.llbasicblock;   (* initial comparison *)
+  body_bb: Llvm.llbasicblock;     (* loop body *)
+  after_bb: Llvm.llbasicblock     (* loop exit *)
+}
+
 (* Still testing, not using everything yet, will remove when done *)
 [@@@warning "-69"]
 type env = {
   the_context: Llvm.llcontext;
   the_module: Llvm.llmodule;
   builder: Llvm.llbuilder;
+  main_fn: Llvm.llvalue;
   ptr: Llvm.llvalue;
-  tape: Llvm.llvalue
+  tape: Llvm.llvalue;
+  loop_stack: loop Stack.t
 }
 
 let codegen_op ~env:env token =
@@ -42,8 +50,35 @@ let codegen_op ~env:env token =
       [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
     let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
     let const_one = Llvm.const_int i8_type 1 in
-    let sub_to_cell = Llvm.build_sub tape_cell_value const_one "sub_to_cell" env.builder in
-    let _ = Llvm.build_store sub_to_cell tape_cell_addr env.builder in 
+    let sub_from_cell = Llvm.build_sub tape_cell_value const_one "sub_from_cell" env.builder in
+    let _ = Llvm.build_store sub_from_cell tape_cell_addr env.builder in 
+    ()
+  | T_LBRAC -> 
+    let num_loops = Int.to_string (Stack.length env.loop_stack) in
+    let new_loop = {
+      header_bb = Llvm.append_block env.the_context ("loop_header_" ^ num_loops) env.main_fn;
+      body_bb = Llvm.append_block env.the_context ("loop_body_" ^ num_loops) env.main_fn;
+      after_bb = Llvm.append_block env.the_context ("loop_after_" ^ num_loops) env.main_fn; 
+    } in
+    let _ = Stack.push new_loop env.loop_stack in
+    let _ = Llvm.build_br new_loop.header_bb env.builder in
+    let _ = Llvm.position_at_end new_loop.header_bb env.builder in
+    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
+    let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
+      [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
+    let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
+    let const_zero = Llvm.const_int i8_type 0 in
+    let cmp = Llvm.build_icmp Llvm.Icmp.Ne tape_cell_value const_zero "cmp" env.builder in
+    let _ = Llvm.build_cond_br cmp new_loop.body_bb new_loop.after_bb env.builder in
+    let _ = Llvm.position_at_end new_loop.body_bb env.builder in
+    ()
+  | T_RBRAC ->
+    let _ = match Stack.pop env.loop_stack with
+    | loop -> 
+      let _ = Llvm.build_br loop.header_bb env.builder in
+      Llvm.position_at_end loop.after_bb env.builder
+    | exception Stack.Empty -> failwith "Unmatched parentheses"
+    in 
     ()
   | op -> failwith ("Op " ^ (token_to_string op) ^ " not supported yet")
 
@@ -58,15 +93,15 @@ let generate tokens =
   let i32_type = Llvm.i32_type the_context in
   let ptr = Llvm.define_global "ptr" (Llvm.const_int i32_type 0) the_module in
 
-  (* Global program state *)
-  let env = {the_context; the_module; builder; ptr; tape} in
+  let void_type = Llvm.void_type the_context in
+  let main_fn = Llvm.define_function "main" (Llvm.function_type void_type [||]) the_module in
+  Llvm.position_at_end (Llvm.entry_block main_fn) builder;
 
-  (* create main function and position builder *)
-  let main_function = Llvm.define_function "main" (Llvm.function_type i32_type [||]) the_module in
-  Llvm.position_at_end (Llvm.entry_block main_function) builder;
+  (* Global program state *)
+  let env = {the_context; the_module; builder; main_fn; ptr; tape; loop_stack = Stack.create ()} in
 
   let _ = List.iter (codegen_op ~env:env) tokens in
 
-  let _ = Llvm.build_ret (Llvm.const_int i32_type 0) builder in
+  let _ = Llvm.build_ret_void builder in
   the_module
  
