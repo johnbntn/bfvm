@@ -6,8 +6,6 @@ type loop = {
   after_bb: Llvm.llbasicblock     (* loop exit *)
 }
 
-(* Still testing, not using everything yet, will remove when done *)
-[@@@warning "-69"]
 type env = {
   the_context: Llvm.llcontext;
   the_module: Llvm.llmodule;
@@ -79,6 +77,25 @@ let codegen_op ~env:env token =
       Llvm.position_at_end loop.after_bb env.builder
     | exception Stack.Empty -> failwith "Unmatched parentheses"
     in 
+    ()
+  | T_DOT ->
+    let get_fn_type = Llvm.function_type i32_type [||] in
+    let get_fn = Llvm.declare_function "getchar"  get_fn_type env.the_module in
+    let get_fn_call = Llvm.build_call get_fn_type get_fn [||] "get_char" env.builder in
+    let trunc_get = Llvm.build_trunc get_fn_call i8_type "trunc_get" env.builder in
+    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
+    let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
+      [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
+    let _ = Llvm.build_store trunc_get tape_cell_addr env.builder in
+    ()
+  | T_COMMA -> 
+    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
+    let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
+    [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
+    let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
+    let put_fn_type = Llvm.function_type i32_type [|i8_type|] in
+    let get_fn = Llvm.declare_function "putchar"  put_fn_type env.the_module in
+    let _ = Llvm.build_call put_fn_type get_fn [|tape_cell_value|] "get_char" env.builder in
     ()
   | op -> failwith ("Op " ^ (token_to_string op) ^ " not supported yet")
 
