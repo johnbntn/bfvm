@@ -1,4 +1,8 @@
 (executable
  (public_name bfvm)
  (name main)
- (libraries bfvm))
+ (libraries 
+  bfvm
+  llvm.all_backends
+  llvm.target
+ ))

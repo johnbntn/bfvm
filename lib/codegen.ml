@@ -78,7 +78,7 @@ let codegen_op ~env:env token =
     | exception Stack.Empty -> failwith "Unmatched parentheses"
     in 
     ()
-  | T_DOT ->
+  | T_COMMA ->
     let get_fn_type = Llvm.function_type i32_type [||] in
     let get_fn = Llvm.declare_function "getchar"  get_fn_type env.the_module in
     let get_fn_call = Llvm.build_call get_fn_type get_fn [||] "get_char" env.builder in
@@ -88,14 +88,14 @@ let codegen_op ~env:env token =
       [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
     let _ = Llvm.build_store trunc_get tape_cell_addr env.builder in
     ()
-  | T_COMMA -> 
+  | T_DOT -> 
     let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
     let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
     [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
     let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
     let put_fn_type = Llvm.function_type i32_type [|i8_type|] in
-    let get_fn = Llvm.declare_function "putchar"  put_fn_type env.the_module in
-    let _ = Llvm.build_call put_fn_type get_fn [|tape_cell_value|] "get_char" env.builder in
+    let put_fn = Llvm.declare_function "putchar"  put_fn_type env.the_module in
+    let _ = Llvm.build_call put_fn_type put_fn [|tape_cell_value|] "put_char" env.builder in
     ()
   | op -> failwith ("Op " ^ (token_to_string op) ^ " not supported yet")
 
@@ -110,8 +110,8 @@ let generate tokens =
   let i32_type = Llvm.i32_type the_context in
   let ptr = Llvm.define_global "ptr" (Llvm.const_int i32_type 0) the_module in
 
-  let void_type = Llvm.void_type the_context in
-  let main_fn = Llvm.define_function "main" (Llvm.function_type void_type [||]) the_module in
+  let i32_type = Llvm.i32_type the_context in
+  let main_fn = Llvm.define_function "main" (Llvm.function_type i32_type [||]) the_module in
   Llvm.position_at_end (Llvm.entry_block main_fn) builder;
 
   (* Global program state *)
@@ -119,6 +119,6 @@ let generate tokens =
 
   let _ = List.iter (codegen_op ~env:env) tokens in
 
-  let _ = Llvm.build_ret_void builder in
+  let _ = Llvm.build_ret (Llvm.const_int i32_type 0) builder in
   the_module
  
