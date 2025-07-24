@@ -5,22 +5,22 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github johnbntn/bfvm))
 
-(authors "Author Name <author@example.com>")
+(authors "John Benton <jbenton4494@gmail.com>")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "John Benton <jbenton4494@gmail.com>")
 
-(license LICENSE)
+(license MIT)
 
 (documentation https://url/to/documentation)
 
 (package
  (name bfvm)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis "Brainf*ck Virtual Machine")
+ (description "Compiler for the Brainf*ck programming language using LLVM")
  (depends ocaml alcotest)
  (tags
-  ("add topics" "to describe" your project)))
+  ("llvm" "bf")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
