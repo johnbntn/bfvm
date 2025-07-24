@@ -10,7 +10,7 @@ let test_parser () =
   check string "Not same strings" expected tokens_str
 
 let test_codegen () =
-  let open Bfvm.Toplevel in
+  let open Bfvm.Compiler in
   let output_file = "/tmp/hello_test.out" in
   let _ = compile "inputs/hello_world.bf" output_file Exe in
   let out = In_channel.input_all (Unix.open_process_args_in output_file [||]) in
@@ -20,8 +20,8 @@ let test_codegen () =
 
 let suite =
 [
-  "Parsing Test", `Quick, test_parser;
-  "Codegen Test", `Quick, test_codegen
+  "Parsing", `Quick, test_parser;
+  "Codegen", `Quick, test_codegen
 ]
 
 let () =

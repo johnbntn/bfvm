@@ -16,41 +16,34 @@ type env = {
   loop_stack: loop Stack.t
 }
 
+let build_ptr_op ~env:env name llvm_fn i32_type =
+  let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
+  let const_one = Llvm.const_int i32_type 1 in
+  let op = llvm_fn load_ptr const_one name env.builder in
+  let _ = Llvm.build_store op env.ptr env.builder in ()
+
+let build_tape_op ~env:env name llvm_fn i32_type i8_type i8_array_type = 
+  let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
+  let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
+    [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
+  let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
+  let const_one = Llvm.const_int i8_type 1 in
+  let op = llvm_fn tape_cell_value const_one name env.builder in
+  let _ = Llvm.build_store op tape_cell_addr env.builder in ()
+
 let codegen_op ~env:env token =
   let i8_type = Llvm.i8_type env.the_context in
   let i32_type = Llvm.i32_type env.the_context in
   let i8_array_type = Llvm.array_type i8_type 30000 in
   match token with
   | T_INC ->
-    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
-    let const_one = Llvm.const_int i32_type 1 in
-    let inc_ptr = Llvm.build_add load_ptr const_one "inc_ptr" env.builder in
-    let _ = Llvm.build_store inc_ptr env.ptr env.builder in
-    ()
+    build_ptr_op ~env:env "inc_ptr" Llvm.build_add i32_type
   | T_DEC -> 
-    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
-    let const_one = Llvm.const_int i32_type 1 in
-    let dec_ptr = Llvm.build_sub load_ptr const_one "dec_ptr" env.builder in
-    let _ = Llvm.build_store dec_ptr env.ptr env.builder in
-    ()
+    build_ptr_op ~env:env "dec_ptr" Llvm.build_sub i32_type
   | T_PLUS ->
-    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
-    let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
-      [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
-    let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
-    let const_one = Llvm.const_int i8_type 1 in
-    let add_to_cell = Llvm.build_add tape_cell_value const_one "add_to_cell" env.builder in
-    let _ = Llvm.build_store add_to_cell tape_cell_addr env.builder in 
-    ()
+    build_tape_op ~env:env "add_to_cell" Llvm.build_add i32_type i8_type i8_array_type
   | T_MINUS ->
-    let load_ptr = Llvm.build_load i32_type env.ptr "load_ptr" env.builder in
-    let tape_cell_addr = Llvm.build_gep i8_array_type env.tape 
-      [|Llvm.const_int i32_type 0; load_ptr|] "tape_cell_addr" env.builder in
-    let tape_cell_value = Llvm.build_load i8_type tape_cell_addr "tape_cell_val" env.builder in
-    let const_one = Llvm.const_int i8_type 1 in
-    let sub_from_cell = Llvm.build_sub tape_cell_value const_one "sub_from_cell" env.builder in
-    let _ = Llvm.build_store sub_from_cell tape_cell_addr env.builder in 
-    ()
+    build_tape_op ~env:env "sub_from_cell" Llvm.build_sub i32_type i8_type i8_array_type
   | T_LBRAC -> 
     let num_loops = Int.to_string (Stack.length env.loop_stack) in
     let new_loop = {
