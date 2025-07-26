@@ -51,6 +51,8 @@ let compile in_file out_file out_file_type =
   let tokens = Parser.parse in_file in
   let the_module = Codegen.generate tokens in
 
+  let _ = Passes.fold_global_ops the_module in
+
   Llvm.set_target_triple target_triple the_module;
   Llvm.set_data_layout data_layout the_module;
 
