@@ -9,7 +9,7 @@ type token =
   | T_RBRAC
   | T_EOF
 
-(* let rec parse_comment input pos = 
+(* let rec parse_comment input pos =
   match input.[pos] with
   (* single line comment*)
   | '/' ->
