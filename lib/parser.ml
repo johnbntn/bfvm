@@ -1,4 +1,4 @@
-type token = 
+type token =
   | T_INC
   | T_DEC
   | T_PLUS
@@ -17,11 +17,13 @@ type token =
   (* multi line comment*)
   | '*' ->  *)
 
-
-let rec parse_lines input_line line_num pos = 
-  let error () = 
-    failwith ("Unexpected character: '" ^ String.make 1 input_line.[pos] ^
-              "' at line " ^ Int.to_string line_num ^ ":" ^ Int.to_string pos) in
+let rec parse_lines input_line line_num pos =
+  let error () =
+    failwith
+      ("Unexpected character: '"
+      ^ String.make 1 input_line.[pos]
+      ^ "' at line " ^ Int.to_string line_num ^ ":" ^ Int.to_string pos)
+  in
   if pos = String.length input_line then []
   else
     match input_line.[pos] with
@@ -35,14 +37,15 @@ let rec parse_lines input_line line_num pos =
     | ']' -> T_RBRAC :: parse_lines input_line line_num (pos + 1)
     | ' ' -> parse_lines input_line line_num (pos + 1)
     | '/' ->
-        if pos + 1 < String.length input_line && input_line.[pos + 1] = '/' then []
+        if pos + 1 < String.length input_line && input_line.[pos + 1] = '/' then
+          []
         else error ()
     | _ -> error ()
-                    
-let parse filename = 
+
+let parse filename =
   let lines = In_channel.with_open_text filename In_channel.input_lines in
   List.flatten (List.mapi (fun i line -> parse_lines line i 0) lines)
-  
+
 let token_to_string = function
   | T_PLUS -> "T_PLUS"
   | T_MINUS -> "T_MINUS"

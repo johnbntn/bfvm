@@ -1,9 +1,4 @@
 (library
  (name bfvm)
  (public_name bfvm)
- (libraries 
-  llvm
-  llvm.all_backends
-  llvm.target
-  cmdliner
- ))
+ (libraries llvm llvm.all_backends llvm.target cmdliner))

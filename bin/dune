@@ -1,6 +1,4 @@
 (executable
  (public_name bfvm)
  (name bfc)
- (libraries 
-  bfvm
- ))
+ (libraries bfvm))

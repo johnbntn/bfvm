@@ -1,4 +1,5 @@
 (test
  (name test_bfvm)
  (libraries alcotest bfvm)
- (deps (source_tree inputs)))
+ (deps
+  (source_tree inputs)))

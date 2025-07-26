@@ -9,7 +9,7 @@ For LLVM
 *)
 
 (* exposing type for testing *)
-type token = 
+type token =
   | T_INC
   | T_DEC
   | T_PLUS
@@ -20,7 +20,5 @@ type token =
   | T_RBRAC
   | T_EOF
 
-  
 val parse : string -> token list
-
 val token_to_string : token -> string
