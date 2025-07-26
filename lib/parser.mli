@@ -1,14 +1,3 @@
-(*
-For LLVM
-- Make global array
-  - Just have it be mutable and if you ever exceed size increase it
-- store index
-- Builders for every op
-- Add loop stuff
-- Add I/O
-*)
-
-(* exposing type for testing *)
 type token =
   | T_INC
   | T_DEC
