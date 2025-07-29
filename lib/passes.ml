@@ -203,19 +203,18 @@ let rec get_opcodes the_module curr_instr ctx =
           | _ ->
               get_opcodes the_module next_instr
                 { fold_instr = None; accum = 0; state = Looking })
-      | _ -> (
+      | Ret -> (
+          let _ = print_endline "got a ret" in
           match ctx.state with
           | FoldingStore ->
-              let _ =
-                print_endline ("starting to fold " ^ Int.to_string ctx.accum)
-              in
               fold ctx the_module
                 (unwrap_instr_pred (Llvm.instr_pred (Option.get curr_instr)))
-          | _ ->
-              let _ = print_endline "Not yet doing that" in
-              let next_instr = get_next instr in
-              get_opcodes the_module next_instr
-                { fold_instr = None; accum = 0; state = Looking }))
+          | _ -> ())
+      | _ ->
+          let _ = print_endline "Not yet doing that" in
+          let next_instr = get_next instr in
+          get_opcodes the_module next_instr
+            { fold_instr = None; accum = 0; state = Looking })
 
 let fold_global_ops the_module =
   Llvm.iter_functions

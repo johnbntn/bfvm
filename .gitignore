@@ -3,4 +3,6 @@ _opam/
 
 out.*
 *.o
-a.out
+*.out
+*.ir
+*.asm
