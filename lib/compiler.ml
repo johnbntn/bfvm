@@ -1,5 +1,6 @@
 open Cmdliner
 
+type opt_level = O0 | O1
 type outfile = Object | Asm | IR | Exe
 
 let output_file_type =
@@ -30,7 +31,25 @@ let output_file =
   in
   Arg.value (Arg.opt Arg.string default info)
 
-let compile in_file out_file out_file_type =
+let opt_level_conv =
+  let parse s =
+    match s with
+    | "0" -> Ok O0
+    | "1" -> Ok O1
+    | _ -> Error (`Msg "optimization level must be 0, 1")
+  in
+  let print ppf = function
+    | O0 -> Format.fprintf ppf "0"
+    | O1 -> Format.fprintf ppf "1"
+  in
+  Arg.conv (parse, print)
+
+let opt_level =
+  let default = O1 in
+  let info = Arg.info [ "O" ] ~doc:"Optimization Level {0, 1}" in
+  Arg.value (Arg.opt opt_level_conv default info)
+
+let compile in_file out_file out_file_type opt_level =
   let _ = Llvm_all_backends.initialize () in
   let target_triple = Llvm_target.Target.default_triple () in
   let target = Llvm_target.Target.by_triple target_triple in
@@ -48,7 +67,9 @@ let compile in_file out_file out_file_type =
   let tokens = Parser.parse in_file in
   let the_module = Codegen.generate tokens in
 
-  let _ = Passes.fold_loops the_module in
+  let _ =
+    match opt_level with O0 -> () | O1 -> Passes.fold_loops the_module
+  in
 
   Llvm.set_target_triple target_triple the_module;
   Llvm.set_data_layout data_layout the_module;
@@ -76,7 +97,8 @@ let compile in_file out_file out_file_type =
 
 let run_compiler () =
   let compiler_term =
-    Term.(const compile $ input_file $ output_file $ output_file_type)
+    Term.(
+      const compile $ input_file $ output_file $ output_file_type $ opt_level)
   in
   let compiler_cmd =
     let program =

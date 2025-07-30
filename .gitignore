@@ -1,6 +1,8 @@
+# opam and build dirs
 _build/
 _opam/
 
+# general executable names
 out.*
 *.o
 *.out
