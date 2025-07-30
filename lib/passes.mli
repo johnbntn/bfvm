@@ -1,1 +1,1 @@
-val fold_global_ops : Llvm.llmodule -> unit
+val fold_loops : Llvm.llmodule -> unit
