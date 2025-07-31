@@ -1,7 +1,7 @@
 open Cmdliner
 
 type opt_level = O0 | O1
-type outfile = Object | Asm | IR | Exe
+type file_type = Object | Asm | IR | Exe
 
 let output_file_type =
   let default = Exe in

@@ -1,0 +1,51 @@
+{0 BFVM}
+
+Compiler for the BF Programming Language
+
+{1 Getting Started}
+
+To install:
+{[
+opam install .
+]}
+in the root of this repository.
+
+{1 Compiler Binary}
+
+The entry point for the compiler is called [bfc]. Run [bfc --help] for a list of options.
+
+{1 API Documentation}
+
+- {!module:Bfvm.Parser}
+- {!module:Bfvm.Codegen}
+- {!module:Bfvm.Passes}
+- {!module:Bfvm.Compiler}
+
+{1 Examples}
+
+Here are some common use cases:
+
+{2 Parse String of BF Code}
+
+{[
+let str = ">>>++---" in
+let tokens = Parser.parse str in
+...
+]}
+
+{2 Generate LLVM IR Module and Optimize It}
+{[
+let the_module = Codegen.generate tokens in
+let _ = Passes.fold_loops the_module in
+Llvm.dump_module the_module
+]}
+
+{2 Turn BF Input File Into Executable}
+{[
+Compiler.compile "in.bf" "a.out" Exe O1
+]}
+
+
+{1 Links}
+
+- {{:https://github.com/johnbntn/bfvm} Source Code}
