@@ -7,7 +7,7 @@ authors: ["John Benton <jbenton4494@gmail.com>"]
 license: "MIT"
 tags: ["llvm" "bf"]
 homepage: "https://github.com/johnbntn/bfvm"
-doc: "https://url/to/documentation"
+doc: "https://johnbntn.github.io/bfvm/bfvm/"
 bug-reports: "https://github.com/johnbntn/bfvm/issues"
 depends: [
   "dune" {>= "3.17"}

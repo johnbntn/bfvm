@@ -10,7 +10,8 @@ type token =
   | T_EOF
 
 val parse : string -> token list
-(** [parse str] parses string [str] of BF code and returns a list of tokens *)
+(** [parse str_or_file] parses BF code and returns a list of tokens. If
+    [str_or_file] is an existing file, its contents will be parsed. *)
 
 val token_to_string : token -> string
 (** [token_to_string t] returns a string representation of token [t] *)

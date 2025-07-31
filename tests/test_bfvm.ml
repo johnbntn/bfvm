@@ -2,12 +2,21 @@ open Alcotest
 
 let list_to_str f tokens = String.concat "--" (List.map f tokens)
 
-let test_parser () =
+let test_file_parser () =
   let open Bfvm.Parser in
   let tokens = parse "inputs/ops.bf" in
   let tokens_str = list_to_str token_to_string tokens in
   let expected =
-    "T_PLUS--T_MINUS--T_DEC--T_INC--T_DOT--" ^ "T_COMMA--T_LBRAC--T_RBRAC"
+    "T_PLUS--T_MINUS--T_DEC--T_INC--T_DOT--T_COMMA--T_LBRAC--T_RBRAC"
+  in
+  check string "Not same strings" expected tokens_str
+
+let test_str_parser () =
+  let open Bfvm.Parser in
+  let tokens = parse "+-<>.,[]" in
+  let tokens_str = list_to_str token_to_string tokens in
+  let expected =
+    "T_PLUS--T_MINUS--T_DEC--T_INC--T_DOT--T_COMMA--T_LBRAC--T_RBRAC"
   in
   check string "Not same strings" expected tokens_str
 
@@ -34,7 +43,8 @@ let test_optimization () =
 
 let suite =
   [
-    ("Parsing", `Quick, test_parser);
+    ("File Parsing", `Quick, test_file_parser);
+    ("String Parsing", `Quick, test_str_parser);
     ("Codegen", `Quick, test_codegen);
     ("Optimization", `Quick, test_optimization);
   ]

@@ -1,6 +1,6 @@
 {0 BFVM}
 
-Compiler for the BF Programming Language
+Compiler for the {{:https://en.wikipedia.org/wiki/Brainfuck} BF} Programming Language
 
 {1 Getting Started}
 
@@ -12,7 +12,7 @@ in the root of this repository.
 
 {1 Compiler Binary}
 
-The entry point for the compiler is called [bfc]. Run [bfc --help] for a list of options.
+The entry point for the compiler is called [bfc]. To compile a file, run [bfc input.bf]. Run [bfc --help] for a list of options.
 
 {1 API Documentation}
 

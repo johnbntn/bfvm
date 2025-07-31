@@ -9,14 +9,6 @@ type token =
   | T_RBRAC
   | T_EOF
 
-(* let rec parse_comment input pos =
-  match input.[pos] with
-  (* single line comment*)
-  | '/' ->
-
-  (* multi line comment*)
-  | '*' ->  *)
-
 let rec parse_lines input_line line_num pos =
   let error () =
     failwith
@@ -42,9 +34,11 @@ let rec parse_lines input_line line_num pos =
         else error ()
     | _ -> error ()
 
-let parse filename =
-  let lines = In_channel.with_open_text filename In_channel.input_lines in
-  List.flatten (List.mapi (fun i line -> parse_lines line i 0) lines)
+let parse str_or_file =
+  if Sys.file_exists str_or_file then
+    let lines = In_channel.with_open_text str_or_file In_channel.input_lines in
+    List.flatten (List.mapi (fun i line -> parse_lines line i 0) lines)
+  else parse_lines str_or_file 0 0
 
 let token_to_string = function
   | T_PLUS -> "T_PLUS"
