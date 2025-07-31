@@ -13,7 +13,7 @@
 
 (license MIT)
 
-(documentation https://johnbntn.github.io/bfvm/bfvm/)
+(documentation https://johnbntn.github.io/bfvm/bfvm/index.html)
 
 (package
  (name bfvm)
